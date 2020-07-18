@@ -239,13 +239,12 @@ function Home({ navigation, firebase }) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
-                contentContainerStyle={styles.scrollView}
-                // refreshControl={
-                //     <RefreshControl
-                //         refreshing={refreshing}
-                //         onRefresh={onRefresh}
-                //     />
-                // }
+                contentContainerStyle={{
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: photoWarning,
+                }}
             >
                 <Text style={styles.mainText}>{mainText}</Text>
                 <View style={styles.toggleView}>

@@ -1,7 +1,8 @@
 {
-  "prettier.jsxSingleQuote": true,
-  "prettier.singleQuote": true,
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+    "prettier.jsxSingleQuote": true,
+    "prettier.singleQuote": true,
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "tabWidth": 4
 }

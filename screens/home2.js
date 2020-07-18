@@ -14,13 +14,10 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as Permissions from "expo-permissions";
 
-import * as Location from 'expo-location';
-
 function Home({ navigation, firebase }) {
-
+    // firebase = firebase.firebase;
     const [refreshing, setRefreshing] = React.useState(false);
     const [mainText, setMainText] = React.useState("You're okay.\nStay safe.");
-
     const [
         isEnabledContactTracing,
         setIsEnabledContactTracing,
@@ -29,7 +26,6 @@ function Home({ navigation, firebase }) {
         isEnabledLocationTracking,
         setIsEnabledLocationTracking,
     ] = React.useState(false);
-
     const [picture, setPicture] = React.useState({});
     const [photoWarning, setPhotoWarning] = React.useState("green");
 
@@ -37,126 +33,6 @@ function Home({ navigation, firebase }) {
         setIsEnabledLocationTracking((previousState) => !previousState);
     const toggleSwitchContactTracing = () =>
         setIsEnabledContactTracing((previousState) => !previousState);
-    
-    const startLocationTracking = async () => {
-        console.log("Start location tracking button pressed")
-
-        // get curr location
-        let { status } = await Location.requestPermissionsAsync();
-        if (status !== 'granted') {
-            console.log('Permission to access location was denied');
-        }
-
-        let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.Highest});
-        console.log(location.coords.latitude, location.coords.longitude)
-        let round_latitude = (Math.trunc(location.coords.latitude * 10000))/10000
-        let round_longitude = (Math.trunc(location.coords.longitude * 10000))/10000
-        console.log(round_latitude, round_longitude)
-        let curr_coords = round_latitude + ' ' + round_longitude
-
-        // get home coordinates
-        let currentUser = firebase.firebase.auth().currentUser.uid;
-        let curr_user_data = await firebase.firebase
-            .firestore()
-            .collection("UserDetails")
-            .doc(currentUser)
-            .get()
-        if(!curr_user_data.data()["isUnderObserVation"]) {
-            return
-        }
-        // check if over
-        if(curr_coords !== curr_user_data.data()["GPSCoordinates"]) {
-            console.log("You are not in quarantine!");
-            alert("You are not in quarantine! If you keep violating quarantine, you will e sent to institutional quarantine");
-        }
-
-        // increase violation
-
-    }
-
-    const startContactTracing = async () => {
-        console.log("Start contact tracing button pressed")
-
-        let { status } = await Location.requestPermissionsAsync();
-        if (status !== 'granted') {
-            console.log('Permission to access location was denied');
-        }
-
-        let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.Highest});
-        console.log(location.coords.latitude, location.coords.longitude)
-        let round_latitude = (Math.trunc(location.coords.latitude * 10000))/10000
-        let round_longitude = (Math.trunc(location.coords.longitude * 10000))/10000
-        console.log(round_latitude, round_longitude)
-
-        // get current date/time
-        var date = new Date().getDate(); //Current Date
-        var month = new Date().getMonth() + 1; //Current Month
-        var year = new Date().getFullYear(); //Current Year
-        var hours = new Date().getHours(); //Current Hours
-        var min = new Date().getMinutes(); //Current Minutes
-        let datetime = year + '-' + month + '-' + date + '-' + hours + '-' + min
-        console.log(datetime)
-
-        // check if this lat, long exists in nearby time
-        let doc_id = round_latitude + ' ' + round_longitude
-        // let doc = await firebase.firestore
-        //                         .collection("contact_tracing")
-        //                         .doc(doc_id).get()
-        let doc = await firebase.firebase
-                .firestore()
-                .collection("contact_tracing")
-                .doc(doc_id)
-                .get()
-
-        if(!doc.exists) {
-            console.log("No one has been near your location")
-        } else {
-            console.log("Someone ill was here at " + doc.data().datetime)
-            const ill_datetime = doc.data().datetime.split('-')
-
-            let isThreat = true
-            if(year != parseInt(ill_datetime[0])) {
-                isThreat = false
-            }
-            else if(month != parseInt(ill_datetime[1])) {
-                isThreat = false
-            }
-            else if(date != parseInt(ill_datetime[2])) {
-                isThreat = false
-            }
-            else if(hours < parseInt(ill_datetime[3]) - 1 || hours > parseInt(ill_datetime[3]) + 1) {
-                isThreat = false
-            }
-
-            if(isThreat) {
-                console.log("You have been in proximity of ill person")
-                alert("You have been in proximity of ill person")
-            } else {
-                console.log("You are under no threat of disease")
-            }
-        }
-
-        // insert this into table if curr_user is sick
-        let currentUser = firebase.firebase.auth().currentUser.uid;
-        let curr_user_data = await firebase.firebase
-            .firestore()
-            .collection("UserDetails")
-            .doc(currentUser)
-            .get()
-
-        if(curr_user_data.data()["isUnderObserVation"] && curr_user_data.data()["GPSCoordinates"] !== doc_id) {
-            // upload location to db
-            firebase.firebase
-                    .firestore()
-                    .collection("contact_tracing")
-                    .doc(doc_id)
-                    .set({datetime: datetime})
-            console.log("doc_id:", doc_id, "\ndatetime: ", datetime, " pushed to db because you are ill and not at home")
-        } else {
-            console.log("You're either not ill or are at home so your location is not pushed to db");
-        }
-        
-    }
 
     async function handleSignout() {
         try {
@@ -167,6 +43,18 @@ function Home({ navigation, firebase }) {
         }
     }
 
+    // async function getData() {
+    //     let currentUser = firebase.firebase.auth().currentUser.uid;
+    //     let obj = await firebase.firebase
+    //         .firestore()
+    //         .collection("UserDetails")
+    //         .doc(currentUser)
+    //         .get()
+    //         .then((data) => {
+    //             return data.data();
+    //         });
+    //     console.log();
+    // }
     const checkPhoto = async () => {
         let currentUser = firebase.firebase.auth().currentUser.uid;
         firebase.firebase
@@ -222,7 +110,7 @@ function Home({ navigation, firebase }) {
                     });
             })
             .catch((error) => {
-                console.log("Failed to upload file and get link - ${error}");
+                console.log(Failed to upload file and get link - ${error});
             });
     };
 
@@ -233,8 +121,6 @@ function Home({ navigation, firebase }) {
     }, []);
 
     console.log("idk");
-
-    // getCurrentUserData();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -249,29 +135,22 @@ function Home({ navigation, firebase }) {
             >
                 <Text style={styles.mainText}>{mainText}</Text>
                 <View style={styles.toggleView}>
-                    {/* <Switch
+                    <Switch
                         style={styles.toggleInput}
                         trackColor={{ false: "grey", true: "grey" }}
                         thumbColor="white"
                         onValueChange={toggleSwitchContactTracing}
                         value={isEnabledContactTracing}
-                    /> */}
-                    <Button
-                        style="flex: 1"
-                        onPress={startContactTracing}
-                        title="START"
-                        color="grey"
-                        disabled={false}
                     />
                     <Text style={styles.toggleText}>Contact Tracing</Text>
                 </View>
                 <View style={styles.toggleView}>
-                <Button
-                        style="flex: 1"
-                        onPress={startLocationTracking}
-                        title="START"
-                        color="grey"
-                        disabled={false}
+                    <Switch
+                        style={styles.toggleInput}
+                        trackColor={{ false: "grey", true: "grey" }}
+                        thumbColor="white"
+                        onValueChange={toggleSwitchLocationTracking}
+                        value={isEnabledLocationTracking}
                     />
                     <Text style={styles.toggleText}>Location tracking</Text>
                 </View>
@@ -299,7 +178,6 @@ function Home({ navigation, firebase }) {
                         Upload quarantine picture
                     </Text>
                 </View>
-
                 <View style={styles.container}>
                     <Text>Home</Text>
                     <Button
@@ -335,7 +213,7 @@ const styles = StyleSheet.create({
         flex: 3,
         fontFamily: "sans-serif-medium",
         color: "white",
-        fontSize: 40,
+        fontSize: 60,
         padding: 20,
     },
     toggleView: {

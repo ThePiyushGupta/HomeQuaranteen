@@ -57,7 +57,7 @@ function Home({ navigation, firebase }) {
         const blob = await response.blob();
         imageName = "TODO";
 
-        var ref = firebaseapp
+        var ref = firebase.firebase
             .storage()
             .ref()
             .child("images/" + imageName);

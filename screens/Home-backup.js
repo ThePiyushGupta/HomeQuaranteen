@@ -19,7 +19,7 @@ import * as Location from 'expo-location';
 function Home({ navigation, firebase }) {
 
     const [refreshing, setRefreshing] = React.useState(false);
-    const [mainText, setMainText] = React.useState("You're okay.\nStay safe.");
+    const [mainText, setMainText] = React.useState("You're okay. Stay safe.");
 
     const [
         isEnabledContactTracing,
@@ -29,9 +29,6 @@ function Home({ navigation, firebase }) {
         isEnabledLocationTracking,
         setIsEnabledLocationTracking,
     ] = React.useState(false);
-
-    const [picture, setPicture] = React.useState({});
-    const [photoWarning, setPhotoWarning] = React.useState("green");
 
     const toggleSwitchLocationTracking = () =>
         setIsEnabledLocationTracking((previousState) => !previousState);
@@ -166,25 +163,7 @@ function Home({ navigation, firebase }) {
             console.log(error);
         }
     }
-
-    const checkPhoto = async () => {
-        let currentUser = firebase.firebase.auth().currentUser.uid;
-        firebase.firebase
-            .firestore()
-            .collection("UserDetails")
-            .doc(currentUser)
-            .get()
-            .then((data) => {
-                let diffdate =
-                    new Date().getMinutes() -
-                    new Date(data.data().PhotoDate.seconds * 1000).getMinutes();
-                if (diffdate > 1) setPhotoWarning("red");
-                console.log();
-            });
-    };
-
     const uploadPicture = async () => {
-        // console.log(setField());
         console.log("Upload picture button pressed");
 
         const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -199,31 +178,13 @@ function Home({ navigation, firebase }) {
 
         const response = await fetch(result.uri);
         const blob = await response.blob();
-        let imageName = "TODO";
+        imageName = "TODO";
 
         var ref = firebase.firebase
             .storage()
             .ref()
-            .child("images/" + firebase.getUserId());
-        return ref
-            .put(blob)
-            .then((snapshot) => {
-                return snapshot.ref.getDownloadURL(); // Will return a promise with the download link
-            })
-            .then((downloadURL) => {
-                let currentUser = firebase.firebase.auth().currentUser.uid;
-                firebase.firebase
-                    .firestore()
-                    .collection("UserDetails")
-                    .doc(currentUser)
-                    .update({
-                        PhotoUrl: downloadURL,
-                        PhotoDate: new Date(),
-                    });
-            })
-            .catch((error) => {
-                console.log("Failed to upload file and get link - ${error}");
-            });
+            .child("images/" + imageName);
+        return ref.put(blob);
     };
 
     const onRefresh = React.useCallback(() => {
@@ -240,12 +201,12 @@ function Home({ navigation, firebase }) {
         <SafeAreaView style={styles.container}>
             <ScrollView
                 contentContainerStyle={styles.scrollView}
-                // refreshControl={
-                //     <RefreshControl
-                //         refreshing={refreshing}
-                //         onRefresh={onRefresh}
-                //     />
-                // }
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
             >
                 <Text style={styles.mainText}>{mainText}</Text>
                 <View style={styles.toggleView}>
@@ -278,9 +239,9 @@ function Home({ navigation, firebase }) {
                 <View style={styles.toggleView}>
                     <Button
                         style="flex: 1"
-                        onPress={checkPhoto}
-                        title="Check Photo Status"
-                        color={photoWarning}
+                        onPress={uploadPicture}
+                        title="UPLOAD"
+                        color="grey"
                         disabled={false}
                     />
                     <Text style={styles.toggleText}>

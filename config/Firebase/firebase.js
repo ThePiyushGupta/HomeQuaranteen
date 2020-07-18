@@ -28,17 +28,45 @@ const Firebase = {
         return firebase
             .firestore()
             .collection("UserDetails")
-            .doc(`${userData.UserId}`)
+            .doc(userData.UserId)
             .set(userData);
     },
-    getCurrentUserData: async () => {
+    getCurrentUserData: () => {
         let currentUser = firebase.auth().currentUser.uid;
-        return await firebase
+        return firebase
             .firestore()
             .collection("UserDetails")
             .doc(currentUser)
-            .get()
-            .data();
+            .get();
+    },
+    setCurrentUserData: (data) => {
+        let currentUser = firebase.auth().currentUser.uid;
+        firebase
+            .firestore()
+            .collection("UserDetails")
+            .doc(currentUser)
+            .set(data);
+    },
+    // setField: (field, data) => {
+    //     async function dothis(field, data) {
+    //         let currentUser = firebase.auth().currentUser.uid;
+    //         let obj = await firebase
+    //             .firestore()
+    //             .collection("UserDetails")
+    //             .doc(currentUser)
+    //             .get()
+    //             .data();
+    //         obj[field] = data;
+    //         firebase
+    //             .firestore()
+    //             .collection("UserDetails")
+    //             .doc(currentUser)
+    //             .set(data);
+    //     }
+    //     return dothis(field, data);
+    // },
+    getUserId: () => {
+        return firebase.auth().currentUser.uid;
     },
     firebase: firebase,
 };
